@@ -39,8 +39,12 @@ class packer(object):
             while 1:
                 if index == 0:
                     pos = 3
+                    if len(self.read()) == 1:
+                        self.clear_file()
+                        return None
                 else:
                     pos = self.read(index-1,return_position=True)[1]
+
                 data = self.read(index+1,return_position=True)[0]
                 if data == "":
                     break
