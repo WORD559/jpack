@@ -34,28 +34,43 @@ class packer(object):
         #f.write(bytearray([0]))
         f.close()
 
-    def delete_array(self,index):
-        try:
-            while 1:
-                if index == 0:
-                    pos = 3
-                    if len(self.read()) == 1:
-                        self.clear_file()
-                        return None
-                else:
-                    pos = self.read(index-1,return_position=True)[1]
+    def delete_array(self,index,hard=True):
+        if not hard:
+            try:
+                while 1:
+                    if index == 0:
+                        pos = 3
+                        if len(self.read()) == 1:
+                            self.clear_file()
+                            return None
+                    else:
+                        #print index-1
+                        pos = self.read(index-1,return_position=True)[1]
+                        print pos
+                        
 
-                data = self.read(index+1,return_position=True)[0]
-                if data == "":
-                    break
-                data = self.write_array(data,False,True)
-                f = open(self.f,"r+b")
-                f.seek(pos)
-                f.write(data)
-                index += 1
-            f.truncate()
-        except KeyboardInterrupt:
-            f.close()
+                    data = self.read(index+1,return_position=True)[0]
+                    #print data
+                    if data == "":
+                        break
+                    data = self.write_array(data,False,True)
+                    f = open(self.f,"r+b")
+                    f.seek(pos)
+                    f.write(data)   
+                    index += 1
+                #print "truncating after",pos
+                f.truncate()
+            except KeyboardInterrupt:
+                f.close()
+        else:
+            temp = packer(os.path.abspath(self.f)[:-len(os.path.basename(os.path.abspath(self.f)))]+"temp")
+            data = self.read()
+            for i in range(len(data)):
+                if i != index:
+                    temp.write_array(data[i])
+            os.remove(self.f)
+            os.rename(os.path.abspath(self.f)[:-len(os.path.basename(os.path.abspath(self.f)))]+"temp",self.f)
+
 
     def write_array(self,array,write=True,return_data=False,mode="ab",array_tag=True,array_length=True,force_write=False):
         """Supports int, str, list, float."""
