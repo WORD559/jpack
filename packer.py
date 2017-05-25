@@ -31,7 +31,7 @@ class packer(object):
     def clear_file(self):
         f = open(self.f,"wb")
         f.write("JPK")
-        f.write(bytearray([0]))
+        #f.write(bytearray([0]))
         f.close()
 
     def delete_array(self,index):
