@@ -14,6 +14,8 @@ class packer(object):
     ## 2 = array
     ## 3 = float
     ## 4 = None
+    ## 5 = Negative Integer
+    ## 6 = Negative Float
     def __init__(self,filepath):
         """Packer object"""
         self.f = filepath
@@ -103,7 +105,11 @@ class packer(object):
 
         for thing in array:
             if isinstance(thing, int):
-                data.append(0)
+                if thing < 0:
+                    data.append(5)
+                    thing *= -1
+                else:
+                    data.append(0)
                 length = len(bin(thing)[2:])
                 len_bytes = int(ceil(length/8.))
                 data.append(len_bytes)
@@ -141,7 +147,11 @@ class packer(object):
                     chunk = binary[count*8:(count+1)*8]
                     #print chunk
             elif isinstance(thing,float):
-                data.append(3)
+                if thing < 0:
+                    data.append(6)
+                    thing *= -1
+                else:
+                    data.append(3)
                 count = 0
                 while int(thing) != thing:
                     count += 1
@@ -223,6 +233,11 @@ class packer(object):
             #print "int"
             r = f.read(length)
             data = int(r.encode("hex"),16)
+
+        if datatype == 5:
+            r = f.read(length)
+            data = int(r.encode("hex"),16)*-1
+            
         if datatype == 1:
             #print "string"
             data = ""
@@ -256,6 +271,16 @@ class packer(object):
             data[1] = int(r.encode("hex"),16)
             
             data = data[0]*10**-(data[1])
+
+        if datatype == 6:
+            data = [None,None]
+            r = f.read(length)
+            data[0] = int(r.encode("hex"),16)
+            r = f.read(1)
+            data[1] = int(r.encode("hex"),16)
+            
+            data = (data[0]*10**-(data[1]))*-1
+            
         if datatype == 4:
             data = None
         if return_position:
